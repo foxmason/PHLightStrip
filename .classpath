@@ -6,9 +6,9 @@
 	<classpathentry kind="lib" path="D:/java-oxygen/workspace/TarsosDSP-master/lib/junit-4.11.jar"/>
 	<classpathentry kind="lib" path="D:/java-oxygen/workspace/TarsosDSP-master/lib/pdj.jar"/>
 	<classpathentry kind="lib" path="D:/java-oxygen/workspace/TarsosDSP-master/lib/TarsosDSP-latest.jar"/>
-	<classpathentry kind="lib" path="D:/PhilipsHueSDK-Java-MultiPlatform-Android-master/JavaDesktopApp/libs/huelocalsdk.jar"/>
-	<classpathentry kind="lib" path="D:/PhilipsHueSDK-Java-MultiPlatform-Android-master/JavaDesktopApp/libs/huesdkresources.jar"/>
 	<classpathentry kind="lib" path="D:/PhilipsHueSDK-Java-MultiPlatform-Android-master/JavaDesktopApp/libs/tablelayout.jar"/>
-	<classpathentry kind="lib" path="D:/java-oxygen/workspace/Rave Project/jSerialComm-2.4.0.jar"/>
+	<classpathentry kind="lib" path="src/main/tablelayout.jar"/>
+	<classpathentry kind="lib" path="src/main/huelocalsdk.jar"/>
+	<classpathentry kind="lib" path="src/main/huesdkresources.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

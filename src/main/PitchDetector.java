@@ -17,15 +17,11 @@ import be.tarsos.dsp.pitch.PitchProcessor.PitchEstimationAlgorithm;
 
 public class PitchDetector implements PitchDetectionHandler {
 
-	private PhilipsHueManager _manager;
-
 	private AudioDispatcher _dispatcher;
 	private Mixer _currentMixer;
 	private PitchEstimationAlgorithm _algo;
 
 	public PitchDetector(PhilipsHueManager manager) {
-		_manager = manager;
-
 		_algo = PitchEstimationAlgorithm.YIN;
 		for (Mixer.Info info : Shared.getMixerInfo(false, true)) {
 			System.out.println(AudioSystem.getMixer(info) + " -- " + info.getName());
