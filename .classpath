@@ -1,14 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <classpath>
-	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JavaSE-1.8"/>
+	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/J2SE-1.5"/>
 	<classpathentry kind="src" path="src"/>
-	<classpathentry kind="lib" path="D:/java-oxygen/workspace/TarsosDSP-master/lib/hamcrest-core-1.3.jar"/>
-	<classpathentry kind="lib" path="D:/java-oxygen/workspace/TarsosDSP-master/lib/junit-4.11.jar"/>
-	<classpathentry kind="lib" path="D:/java-oxygen/workspace/TarsosDSP-master/lib/pdj.jar"/>
-	<classpathentry kind="lib" path="D:/java-oxygen/workspace/TarsosDSP-master/lib/TarsosDSP-latest.jar"/>
-	<classpathentry kind="lib" path="D:/PhilipsHueSDK-Java-MultiPlatform-Android-master/JavaDesktopApp/libs/huelocalsdk.jar"/>
-	<classpathentry kind="lib" path="D:/PhilipsHueSDK-Java-MultiPlatform-Android-master/JavaDesktopApp/libs/huesdkresources.jar"/>
-	<classpathentry kind="lib" path="D:/PhilipsHueSDK-Java-MultiPlatform-Android-master/JavaDesktopApp/libs/tablelayout.jar"/>
-	<classpathentry kind="lib" path="D:/java-oxygen/workspace/Rave Project/jSerialComm-2.4.0.jar"/>
+	<classpathentry kind="lib" path="libs/huelocalsdk.jar"/>
+	<classpathentry kind="lib" path="libs/huesdkresources.jar"/>
+	<classpathentry kind="lib" path="libs/tablelayout.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

@@ -16,7 +16,6 @@ import com.philips.lighting.model.PHLightState;
 public class Controller {
 
 	private PHHueSDK phHueSDK;
-	private boolean _connected = false;
 	private static final int MAX_HUE = 65535;
 
 	public Controller() {
@@ -25,14 +24,15 @@ public class Controller {
 
 	public void findBridges() {
 		phHueSDK = PHHueSDK.getInstance();
-		PHBridgeSearchManager sm = (PHBridgeSearchManager) phHueSDK.getSDKService(PHHueSDK.SEARCH_BRIDGE);
+		PHBridgeSearchManager sm = (PHBridgeSearchManager) phHueSDK
+				.getSDKService(PHHueSDK.SEARCH_BRIDGE);
 		sm.search(true, true);
 	}
 
 	/**
 	 * Connect to the last known access point. This method is triggered by the
-	 * Connect to Bridge button but it can equally be used to automatically connect
-	 * to a bridge.
+	 * Connect to Bridge button but it can equally be used to automatically
+	 * connect to a bridge.
 	 * 
 	 */
 	public boolean connectToLastKnownAccessPoint() {
@@ -40,7 +40,8 @@ public class Controller {
 		String lastIpAddress = HueProperties.getLastConnectedIP();
 
 		if (username == null || lastIpAddress == null) {
-			System.out.println("Missing Last Username or Last IP.  Last known connection not found.");
+			System.out
+					.println("Missing Last Username or Last IP.  Last known connection not found.");
 			return false;
 		}
 
@@ -52,27 +53,24 @@ public class Controller {
 	}
 
 	private PHSDKListener listener = new PHSDKListener() {
-		@Override
 		public void onAccessPointsFound(List<PHAccessPoint> accessPointsList) {
 			System.out.println("Access points found...");
 			phHueSDK.connect(accessPointsList.get(0));
-			System.out.println("Connecting to " + accessPointsList.get(0).getBridgeId());
+			System.out.println("Connecting to "
+					+ accessPointsList.get(0).getBridgeId());
 		}
 
-		@Override
 		public void onAuthenticationRequired(PHAccessPoint accessPoint) {
 			phHueSDK.startPushlinkAuthentication(accessPoint);
 			System.out.println("Authentication required...");
 		}
 
-		@Override
 		public void onBridgeConnected(PHBridge bridge, String username) {
-			_connected = true;
-
 			phHueSDK.setSelectedBridge(bridge);
 			phHueSDK.enableHeartbeat(bridge, PHHueSDK.HB_INTERVAL);
 			System.out.println("Bridge Connected...");
-			String lastIpAddress = bridge.getResourceCache().getBridgeConfiguration().getIpAddress();
+			String lastIpAddress = bridge.getResourceCache()
+					.getBridgeConfiguration().getIpAddress();
 			HueProperties.storeUsername(username);
 			HueProperties.storeLastIPAddress(lastIpAddress);
 			HueProperties.saveProperties();
@@ -80,27 +78,23 @@ public class Controller {
 			syncAndSendData();
 		}
 
-		@Override
 		public void onCacheUpdated(List<Integer> arg0, PHBridge arg1) {
 		}
 
-		@Override
 		public void onConnectionLost(PHAccessPoint arg0) {
 		}
 
-		@Override
 		public void onConnectionResumed(PHBridge arg0) {
 		}
 
-		@Override
 		public void onError(int code, final String message) {
 			System.out.println(message);
 		}
 
-		@Override
 		public void onParsingErrors(List<PHHueParsingError> parsingErrorsList) {
 			for (PHHueParsingError parsingError : parsingErrorsList) {
-				System.out.println("ParsingError : " + parsingError.getMessage());
+				System.out.println("ParsingError : "
+						+ parsingError.getMessage());
 			}
 		}
 	};
@@ -113,11 +107,11 @@ public class Controller {
 		this.listener = listener;
 	}
 
-	///
+	// /
 
-	///
+	// /
 
-	///
+	// /
 
 	public void syncAndSendData() {
 		PHBridge bridge = phHueSDK.getSelectedBridge();
@@ -143,7 +137,8 @@ public class Controller {
 			phls = allLights.get(target).getLastKnownLightState();
 			rgb = xyBriToRgb(phls.getX(), phls.getY(), phls.getBrightness());
 
-			System.out.println(allLights.get(target).getName() + " => " + rgb[0] + " : " + rgb[1] + " : " + rgb[2]);
+			System.out.println(allLights.get(target).getName() + " => "
+					+ rgb[0] + " : " + rgb[1] + " : " + rgb[2]);
 			// apply to lights from pi
 
 			try {
@@ -163,9 +158,12 @@ public class Controller {
 		double r = X * 1.612 - Y * 0.203 - Z * 0.302;
 		double g = -X * 0.509 + Y * 1.412 + Z * 0.066;
 		double b = X * 0.026 - Y * 0.072 + Z * 0.962;
-		r = r <= 0.0031308 ? 12.92 * r : (1.0 + 0.055) * Math.pow(r, (1.0 / 2.4)) - 0.055;
-		g = g <= 0.0031308 ? 12.92 * g : (1.0 + 0.055) * Math.pow(g, (1.0 / 2.4)) - 0.055;
-		b = b <= 0.0031308 ? 12.92 * b : (1.0 + 0.055) * Math.pow(b, (1.0 / 2.4)) - 0.055;
+		r = r <= 0.0031308 ? 12.92 * r : (1.0 + 0.055)
+				* Math.pow(r, (1.0 / 2.4)) - 0.055;
+		g = g <= 0.0031308 ? 12.92 * g : (1.0 + 0.055)
+				* Math.pow(g, (1.0 / 2.4)) - 0.055;
+		b = b <= 0.0031308 ? 12.92 * b : (1.0 + 0.055)
+				* Math.pow(b, (1.0 / 2.4)) - 0.055;
 		double maxValue = Math.max(Math.max(r, g), b);
 		r /= maxValue;
 		g /= maxValue;
@@ -201,9 +199,12 @@ public class Controller {
 				}
 
 				while (target != null) {
-					System.out.println("{H: " + target.getLastKnownLightState().getHue() + " S: "
-							+ target.getLastKnownLightState().getSaturation() + " V: "
-							+ target.getLastKnownLightState().getBrightness() + "}");
+					System.out.println("{H: "
+							+ target.getLastKnownLightState().getHue() + " S: "
+							+ target.getLastKnownLightState().getSaturation()
+							+ " V: "
+							+ target.getLastKnownLightState().getBrightness()
+							+ "}");
 					try {
 						Thread.sleep(1000);
 					} catch (InterruptedException e) {
@@ -215,7 +216,7 @@ public class Controller {
 		thread.start();
 	}
 
-	///
+	// /
 
 	public void randomLights() {
 		PHBridge bridge = phHueSDK.getSelectedBridge();
@@ -228,7 +229,9 @@ public class Controller {
 		for (PHLight light : allLights) {
 			PHLightState lightState = new PHLightState();
 			lightState.setHue(rand.nextInt(MAX_HUE));
-			bridge.updateLightState(light, lightState); // If no bridge response is required then use this simpler form.
+			bridge.updateLightState(light, lightState); // If no bridge response
+														// is required then use
+														// this simpler form.
 		}
 	}
 
@@ -244,7 +247,10 @@ public class Controller {
 				PHLightState lightState = new PHLightState();
 				lightState.setHue(rand.nextInt(MAX_HUE));
 				lightState.setTransitionTime(0);
-				bridge.updateLightState(light, lightState); // If no bridge response is required then use this simpler
+				bridge.updateLightState(light, lightState); // If no bridge
+															// response is
+															// required then use
+															// this simpler
 															// form.
 			}
 			try {
