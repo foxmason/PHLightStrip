@@ -12,6 +12,10 @@ import com.philips.lighting.model.PHBridgeResourcesCache;
 import com.philips.lighting.model.PHHueParsingError;
 import com.philips.lighting.model.PHLight;
 import com.philips.lighting.model.PHLightState;
+import com.pi4j.io.gpio.GpioController;
+import com.pi4j.io.gpio.GpioFactory;
+import com.pi4j.io.gpio.GpioPinAnalogOutput;
+import com.pi4j.io.gpio.RaspiPin;
 
 public class Controller {
 
@@ -107,11 +111,25 @@ public class Controller {
 		this.listener = listener;
 	}
 
-	// /
+	//
 
-	// /
+	//
 
-	// /
+	//
+
+	private GpioController _gpio;
+	private GpioPinAnalogOutput _outR;
+	private GpioPinAnalogOutput _outG;
+	private GpioPinAnalogOutput _outB;
+	private GpioPinAnalogOutput _outW;
+
+	public void initiatePorts() {
+		_gpio = GpioFactory.getInstance();
+		_outR = _gpio.provisionAnalogOutputPin(RaspiPin.GPIO_21);
+		_outG = _gpio.provisionAnalogOutputPin(RaspiPin.GPIO_22);
+		_outB = _gpio.provisionAnalogOutputPin(RaspiPin.GPIO_23);
+		_outW = _gpio.provisionAnalogOutputPin(RaspiPin.GPIO_24);
+	}
 
 	public void syncAndSendData() {
 		PHBridge bridge = phHueSDK.getSelectedBridge();
@@ -139,7 +157,7 @@ public class Controller {
 
 			System.out.println(allLights.get(target).getName() + " => "
 					+ rgb[0] + " : " + rgb[1] + " : " + rgb[2]);
-			// apply to lights from pi
+			exportRGB(rgb[0], rgb[1], rgb[2]);
 
 			try {
 				Thread.sleep(500);
@@ -148,6 +166,13 @@ public class Controller {
 			}
 
 		}
+	}
+
+	private void exportRGB(int r, int g, int b) {
+		_outR.setValue(1023);
+		_outG.setValue(0);
+		_outB.setValue(0);
+		_outW.setValue(1023);
 	}
 
 	private int[] xyBriToRgb(double x, double y, double bri) {
