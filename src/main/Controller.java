@@ -1,5 +1,6 @@
 package main;
 
+import java.awt.Color;
 import java.util.List;
 import java.util.Random;
 
@@ -12,10 +13,15 @@ import com.philips.lighting.model.PHBridgeResourcesCache;
 import com.philips.lighting.model.PHHueParsingError;
 import com.philips.lighting.model.PHLight;
 import com.philips.lighting.model.PHLightState;
-import com.pi4j.io.gpio.GpioController;
-import com.pi4j.io.gpio.GpioFactory;
-import com.pi4j.io.gpio.GpioPinAnalogOutput;
-import com.pi4j.io.gpio.RaspiPin;
+import com.pi4j.io.serial.Baud;
+import com.pi4j.io.serial.DataBits;
+import com.pi4j.io.serial.FlowControl;
+import com.pi4j.io.serial.Parity;
+import com.pi4j.io.serial.Serial;
+import com.pi4j.io.serial.SerialConfig;
+import com.pi4j.io.serial.SerialFactory;
+import com.pi4j.io.serial.SerialPort;
+import com.pi4j.io.serial.StopBits;
 
 public class Controller {
 
@@ -116,19 +122,21 @@ public class Controller {
 	//
 
 	//
-
-	private GpioController _gpio;
-	private GpioPinAnalogOutput _outR;
-	private GpioPinAnalogOutput _outG;
-	private GpioPinAnalogOutput _outB;
-	private GpioPinAnalogOutput _outW;
+	private Serial _serial;
 
 	public void initiatePorts() {
-		_gpio = GpioFactory.getInstance();
-		_outR = _gpio.provisionAnalogOutputPin(RaspiPin.GPIO_21);
-		_outG = _gpio.provisionAnalogOutputPin(RaspiPin.GPIO_22);
-		_outB = _gpio.provisionAnalogOutputPin(RaspiPin.GPIO_23);
-		_outW = _gpio.provisionAnalogOutputPin(RaspiPin.GPIO_24);
+		_serial = SerialFactory.createInstance();
+		try {
+			SerialConfig config = new SerialConfig();
+			config.device("/dev/ttyUSB0").baud(Baud._9600)
+					.dataBits(DataBits._8).parity(Parity.NONE)
+					.stopBits(StopBits._1).flowControl(FlowControl.NONE);
+
+			_serial.open(config);
+		} catch (Exception ex) {
+			System.out.println("SERIAL SETUP FAILED : " + ex.getMessage());
+			return;
+		}
 	}
 
 	public void syncAndSendData() {
@@ -146,67 +154,43 @@ public class Controller {
 		}
 
 		PHLightState phls = null;
-		int[] rgb = null;
+		int rgb = 0;
 
 		while (true) {
 			cache = bridge.getResourceCache();
 			allLights = cache.getAllLights();
 
 			phls = allLights.get(target).getLastKnownLightState();
-			rgb = xyBriToRgb(phls.getX(), phls.getY(), phls.getBrightness());
+			rgb = Color.HSBtoRGB((float) (phls.getHue() / 65535.0), (float) (phls.getSaturation() / 255.0), (float) (phls.getBrightness() / 255.0));
+			Color color = new Color(rgb);
+			float[] comp = color.getRGBColorComponents(null);			
+			int r = (int) (comp[0] * 255);
+			int g = (int) (comp[1] * 255);
+			int b = (int) (comp[2] * 255);
 
-			System.out.println(allLights.get(target).getName() + " => "
-					+ rgb[0] + " : " + rgb[1] + " : " + rgb[2]);
-			exportRGB(rgb[0], rgb[1], rgb[2]);
+			if (!phls.isOn()) {
+				r = 0;
+				g = 0;
+				b = 0;
+			}			
+			
+			System.out.println(allLights.get(target).getName() + " => " +  r + " : " + g + " : " + b);
+			exportRGB(r, g, b);
 
 			try {
-				Thread.sleep(500);
+				Thread.sleep(1000);
 			} catch (InterruptedException e) {
 				e.printStackTrace();
 			}
-
 		}
 	}
 
 	private void exportRGB(int r, int g, int b) {
-		_outR.setValue(1023);
-		_outG.setValue(0);
-		_outB.setValue(0);
-		_outW.setValue(1023);
-	}
-
-	private int[] xyBriToRgb(double x, double y, double bri) {
-		double z = 1.0 - x - y;
-		double Y = bri / 255.0; // Brightness of lamp
-		double X = (Y / y) * x;
-		double Z = (Y / y) * z;
-		double r = X * 1.612 - Y * 0.203 - Z * 0.302;
-		double g = -X * 0.509 + Y * 1.412 + Z * 0.066;
-		double b = X * 0.026 - Y * 0.072 + Z * 0.962;
-		r = r <= 0.0031308 ? 12.92 * r : (1.0 + 0.055)
-				* Math.pow(r, (1.0 / 2.4)) - 0.055;
-		g = g <= 0.0031308 ? 12.92 * g : (1.0 + 0.055)
-				* Math.pow(g, (1.0 / 2.4)) - 0.055;
-		b = b <= 0.0031308 ? 12.92 * b : (1.0 + 0.055)
-				* Math.pow(b, (1.0 / 2.4)) - 0.055;
-		double maxValue = Math.max(Math.max(r, g), b);
-		r /= maxValue;
-		g /= maxValue;
-		b /= maxValue;
-		r = r * 255;
-		if (r < 0) {
-			r = 255;
+		try {
+			_serial.writeln((r + 100) + ":" + (g + 100) + ":" + (b + 100));
+		} catch (Exception e) {
+			e.printStackTrace();
 		}
-		g = g * 255;
-		if (g < 0) {
-			g = 255;
-		}
-		b = b * 255;
-		if (b < 0) {
-			b = 255;
-		}
-
-		return new int[] { (int) r, (int) g, (int) b };
 	}
 
 	public void startSyncThread() {
