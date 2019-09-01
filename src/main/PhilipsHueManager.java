@@ -13,7 +13,6 @@ public class PhilipsHueManager {
 		_controller = new Controller();
 		phHueSDK.getNotificationManager().registerSDKListener(_controller.getListener());
 
-		_controller.initiatePorts();
 		_controller.findBridges();
 	}
 
